@@ -2,7 +2,7 @@
 
 [![Syndae Tool](https://img.shields.io/badge/Syndae-Agent%20OS%20Connector-6366f1.svg)](https://github.com/syndae-ai/syndae)
 [![MCP Protocol](https://img.shields.io/badge/MCP-2024--11--05-10b981.svg)](https://modelcontextprotocol.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 > Isolated Bi-Directional WhatsApp Connect Micro-Daemon & MCP 2024-11-05 Server for **Syndae Agent OS**.
 
@@ -318,3 +318,9 @@ The test suite validates:
 3. Bi-directional Syndae relay payload schema and auth headers against a mock Syndae server.
 4. MCP 2024-11-05 JSON-RPC protocol compliance (`initialize`, `tools/list`, `tools/call`, error handling).
 5. MCP HTTP transport endpoints (`/health`, `/status`, `/stickers`, `/mcp`, `/trigger`).
+
+---
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE) for details.

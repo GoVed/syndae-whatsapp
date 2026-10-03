@@ -27,7 +27,7 @@
     "security-isolation"
   ],
   "author": "Syndae Community",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.19",
     "commander": "^13.1.0",

@@ -15,7 +15,7 @@
     "status": "node src/index.js status",
     "trigger": "node src/index.js trigger",
     "register": "node src/index.js register",
-    "test": "node tests/mcp.test.js"
+    "test": "node tests/mcp.test.js && node tests/auto-reply.test.js"
   },
   "keywords": [
     "syndae",

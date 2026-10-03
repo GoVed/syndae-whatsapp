@@ -7,6 +7,13 @@ import { getBridge } from '../bridge/index.js';
 import { findStickers, getAllStickers, listCategories } from '../stickers/search.js';
 import { handleImportChatExport } from './handlers/chat-export.js';
 import { renderQrPage } from './qr-template.js';
+import {
+  getAutoReplyConfig,
+  saveAutoReplyConfig,
+  shouldAutoReply,
+  generateAutoReplyText,
+  attachAutoReply
+} from '../bridge/auto-reply.js';
 import config from '../config.js';
 import logger from '../utils/logger.js';
 import QRCode from 'qrcode';
@@ -21,6 +28,9 @@ const __dirname = path.dirname(__filename);
  * @returns {import('express').Express}
  */
 export function createHttpApp(bridge, relay = null) {
+  // Attach automated reply handler to bridge events
+  attachAutoReply(bridge);
+
   const app = express();
   app.use(express.json({ limit: '50mb' }));
   app.use(express.text({ limit: '50mb' }));
@@ -35,6 +45,9 @@ export function createHttpApp(bridge, relay = null) {
     }
     next();
   });
+
+  // Root redirect to pairing / auto-reply configuration dashboard
+  app.get('/', (req, res) => res.redirect('/qr'));
 
   // MCP JSON-RPC 2.0 Handler (compatible with Syndae McpTransport::connect_http)
   const jsonRpcHandler = async (req, res) => {
@@ -165,7 +178,64 @@ export function createHttpApp(bridge, relay = null) {
       } catch {}
     }
 
-    return res.send(renderQrPage(status, initialQrUrl, bridge.latestQr || ''));
+    return res.send(renderQrPage(status, initialQrUrl, bridge.latestQr || '', getAutoReplyConfig()));
+  });
+
+  // Auto-Reply Configuration API
+  app.get('/config/auto-reply', (req, res) => {
+    res.json({
+      success: true,
+      config: getAutoReplyConfig()
+    });
+  });
+
+  app.post('/config/auto-reply', (req, res) => {
+    try {
+      const updated = saveAutoReplyConfig(req.body || {});
+      res.json({
+        success: true,
+        config: updated
+      });
+    } catch (err) {
+      res.status(400).json({ success: false, error: err.message });
+    }
+  });
+
+  // Auto-Reply Test & Simulator API
+  app.post('/auto-reply/test', async (req, res) => {
+    try {
+      const { message, text, senderName, isGroup, chatName, configOverride } = req.body || {};
+      const msgText = message || text || 'Hey Syndae, are you there?';
+      const sender = senderName || 'Alice';
+      const item = {
+        message: msgText,
+        text: msgText,
+        senderName: sender,
+        chatName: chatName || (isGroup ? 'Test Group' : sender),
+        isGroup: Boolean(isGroup),
+        direction: 'inbound',
+        from: '+15551234567',
+        chatJid: isGroup ? '120363000000000000@g.us' : '15551234567@s.whatsapp.net',
+        messageId: `TEST_${Date.now()}`
+      };
+
+      const cfg = configOverride ? { ...getAutoReplyConfig(), ...configOverride } : getAutoReplyConfig();
+      const evalResult = shouldAutoReply(item, { config: cfg });
+
+      let replyPreview = null;
+      if (evalResult.shouldReply) {
+        replyPreview = await generateAutoReplyText(item, { config: cfg });
+      }
+
+      res.json({
+        success: true,
+        testInput: item,
+        evaluation: evalResult,
+        replyPreview
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   });
 
   // REST Stickers helper

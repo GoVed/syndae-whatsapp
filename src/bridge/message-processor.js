@@ -6,6 +6,7 @@ import { parseWhatsAppMessageContent } from './parser.js';
 import { resolveMentionsInText } from './mentions.js';
 import { downloadInboundMedia } from './media.js';
 import { applyReactionToHistory } from './history-ops.js';
+import { processAutoReply } from './auto-reply.js';
 
 /**
  * Standardizes and processes a raw Baileys WebMessageInfo object.
@@ -149,8 +150,16 @@ export function processRawMessage(bridge, msg, isHistoric = false) {
             bridge.saveHistoryToDisk();
           }
           bridge.emit('message', item);
+          processAutoReply(bridge, item).catch((err) =>
+            logger.warn({ err: err.message }, 'Failed auto-reply for media message')
+          );
         })
-        .catch(() => bridge.emit('message', item));
+        .catch(() => {
+          bridge.emit('message', item);
+          processAutoReply(bridge, item).catch((err) =>
+            logger.warn({ err: err.message }, 'Failed auto-reply for media message')
+          );
+        });
     } else if (type === 'reaction') {
       logger.info({ from: item.from, senderName, emoji: item.reaction, targetMessageId: item.targetMessageId }, 'Inbound WhatsApp reaction received');
       bridge.emit('reaction', item);
@@ -158,6 +167,9 @@ export function processRawMessage(bridge, msg, isHistoric = false) {
     } else {
       logger.info({ from: item.from, senderName, isGroup, textSnippet: text.substring(0, 50) }, 'Inbound WhatsApp message received');
       bridge.emit('message', item);
+      processAutoReply(bridge, item).catch((err) =>
+        logger.warn({ err: err.message }, 'Failed auto-reply for text message')
+      );
     }
   }
 

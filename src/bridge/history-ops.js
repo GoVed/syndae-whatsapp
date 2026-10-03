@@ -49,7 +49,7 @@ export function filterHistory(history, chats, contacts, options = 50) {
              matchedJids.has(jid) ||
              sender.includes(chatJid) ||
              cName.includes(chatJid) ||
-             (cleanTarget && cleanTarget.length >= 5 && from.includes(cleanTarget));
+             (cleanTarget && cleanTarget.length >= 5 && (from.includes(cleanTarget) || jid.includes(cleanTarget)));
     });
   }
 

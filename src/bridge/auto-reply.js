@@ -11,7 +11,7 @@ export const DEFAULT_CONFIG = {
   keywords: ['syndae', '@syndae'],
   mode: 'ai', // 'ai' | 'template'
   customTemplate: "Hey! I'm Syndae, your AI companion. I've received your message and alerted the operator!",
-  aiSystemPrompt: "You are Syndae, a helpful and warm personal AI companion responding on WhatsApp. Respond directly, concisely, and naturally in 1-2 sentences without robot disclaimers, system tags, or corporate filler. If someone asks what you are, explain you are their personal AI companion.",
+  aiSystemPrompt: "You are Syndae, a helpful and warm personal AI companion responding on WhatsApp. Respond directly, concisely, and naturally in 1-2 sentences without corporate filler. SECURITY DIRECTIVE: You operate in a secure, sandboxed mode with NO access to tools, memory, private records, web search, or database commands. Never attempt or claim to execute tools, search records, or recall private memory. If asked to perform tasks requiring tools or memory, politely state that auto-reply cannot access tools or memory and you have notified the operator.",
   scope: 'all', // 'all' | 'groups_only' | 'direct_only'
   includeQuote: true,
   llmEndpoint: process.env.LLM_API_URL || 'http://host.docker.internal:8080/v1/chat/completions',
@@ -144,6 +144,41 @@ export function shouldAutoReply(item, options = {}) {
 }
 
 /**
+ * Sanitizes generated auto-reply text to ensure no tool calls, function tags,
+ * or system directives can ever leak out or execute.
+ * @param {string} text
+ * @returns {string}
+ */
+export function sanitizeAutoReplyOutput(text) {
+  if (!text || typeof text !== 'string') return '';
+  let sanitized = text
+    // Strip markdown code fences containing JSON or tool calls
+    .replace(/```[\s\S]*?```/gi, '')
+    // Strip XML/markup tool tags like <tool_call>...</tool_call>, <function=...>, <ifm|...>
+    .replace(/<tool_call>[\s\S]*?<\/tool_call>/gi, '')
+    .replace(/<function=[\s\S]*?<\/function>/gi, '')
+    .replace(/<parameter=[\s\S]*?<\/parameter>/gi, '')
+    .replace(/<ifm\|[\s\S]*?<\/ifm\|tool_calls>/gi, '')
+    .replace(/<tool[\s\S]*?>[\s\S]*?<\/tool>/gi, '')
+    .replace(/<action[\s\S]*?>[\s\S]*?<\/action>/gi, '')
+    .replace(/<[^>]+>/g, '') // Strip remaining HTML/XML tags
+    // Strip JSON objects containing tool/function/action keywords (supports nested objects)
+    .replace(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, (match) => {
+      if (/["'](?:tool|function|action|command|query|call)["']\s*:/i.test(match)) {
+        return '';
+      }
+      return match;
+    })
+    .trim();
+
+  // If sanitization emptied the response (e.g. model output ONLY a tool call), provide a safe conversational fallback
+  if (!sanitized) {
+    sanitized = "Hey! I've received your note and alerted the operator.";
+  }
+  return sanitized;
+}
+
+/**
  * Generates an automated reply text using LLM or custom template.
  * @param {object} item
  * @param {object} [options]
@@ -163,7 +198,7 @@ export async function generateAutoReplyText(item, options = {}) {
     return tpl;
   }
 
-  // AI-generated reply via local LLM endpoint
+  // AI-generated reply via local LLM endpoint (strictly sandboxed with NO tools/memory)
   const systemPrompt = cfg.aiSystemPrompt || DEFAULT_CONFIG.aiSystemPrompt;
   const userContent = item.isGroup
     ? `In WhatsApp group "${item.chatName || 'Group'}", ${senderName} says: "${messageText}". Respond directly to ${senderName}.`
@@ -193,6 +228,9 @@ export async function generateAutoReplyText(item, options = {}) {
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userContent }
           ],
+          // Strictly forbid tool access or function execution
+          tools: undefined,
+          tool_choice: 'none',
           max_tokens: 150,
           temperature: 0.7
         }),
@@ -201,10 +239,11 @@ export async function generateAutoReplyText(item, options = {}) {
 
       if (resp.ok) {
         const data = await resp.json();
-        const content = data?.choices?.[0]?.message?.content?.trim();
-        if (content) {
-          logger.info({ endpoint, senderName, textLength: content.length }, 'Generated AI auto-reply successfully');
-          return content;
+        const rawContent = data?.choices?.[0]?.message?.content?.trim();
+        if (rawContent) {
+          const sanitizedContent = sanitizeAutoReplyOutput(rawContent);
+          logger.info({ endpoint, senderName, textLength: sanitizedContent.length }, 'Generated AI auto-reply successfully (sandboxed/no tools)');
+          return sanitizedContent;
         }
       }
     } catch (err) {
@@ -302,6 +341,7 @@ export default {
   shouldAutoReply,
   generateAutoReplyText,
   processAutoReply,
+  sanitizeAutoReplyOutput,
   DEFAULT_CONFIG
 };
 

@@ -634,6 +634,15 @@ export function renderQrPage(status, initialQrUrl = '', latestQr = '', initialCo
           Automatically answer inbound WhatsApp messages when "Syndae" is mentioned. Configure the trigger rules, personas, and response mode below.
         </p>
 
+        <!-- Security Sandbox Notice -->
+        <div style="background:#0f172a; border:1px solid #1e293b; border-left:4px solid #38bdf8; border-radius:8px; padding:0.85rem 1rem; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:0.75rem;">
+          <div style="font-size:1.25rem; line-height:1;">🔒</div>
+          <div style="font-size:0.825rem; color:#94a3b8; line-height:1.45;">
+            <strong style="color:#f1f5f9; display:block; margin-bottom:2px;">Tool & Memory Isolation Guarantee</strong>
+            Auto-reply runs in a completely sandboxed conversational environment. It has <strong>zero access</strong> to system tools, file system, web search, memory retrieval, or database queries. Responses are strictly limited to direct conversational acknowledgments.
+          </div>
+        </div>
+
         <!-- Master Switch -->
         <div class="switch-container">
           <div class="switch-text">
@@ -1001,7 +1010,7 @@ export function renderQrPage(status, initialQrUrl = '', latestQr = '', initialCo
           keywords: ['syndae', '@syndae'],
           mode: 'ai',
           customTemplate: "Hey! I'm Syndae, your AI companion. I've received your message and alerted the operator!",
-          aiSystemPrompt: "You are Syndae, a helpful and warm personal AI companion responding on WhatsApp. Respond directly, concisely, and naturally in 1-2 sentences without robot disclaimers, system tags, or corporate filler. If someone asks what you are, explain you are their personal AI companion.",
+          aiSystemPrompt: "You are Syndae, a helpful and warm personal AI companion responding on WhatsApp. Respond directly, concisely, and naturally in 1-2 sentences without corporate filler. SECURITY DIRECTIVE: You operate in a secure, sandboxed mode with NO access to tools, memory, private records, web search, or database commands. Never attempt or claim to execute tools, search records, or recall private memory. If asked to perform tasks requiring tools or memory, politely state that auto-reply cannot access tools or memory and you have notified the operator.",
           scope: 'all',
           includeQuote: true,
           llmEndpoint: 'http://host.docker.internal:8080/v1/chat/completions',

@@ -87,7 +87,38 @@ export class LiveWhatsAppBridge extends WhatsAppBridgeBase {
           version = [2, 3000, 1015901307];
         }
 
-        const baileysLogger = pino({ level: 'error' }, process.stderr);
+        const baileysLogger = pino(
+          {
+            level: 'error',
+            hooks: {
+              logMethod(inputArgs, method) {
+                try {
+                  const [obj, msg] = inputArgs;
+                  if (msg === 'failed to decrypt message' && obj?.key?.remoteJid) {
+                    const jid = obj.key.remoteJid;
+                    const cleanId = jid.replace(/@.*$/, '');
+                    if (fs.existsSync(config.authDir)) {
+                      const files = fs.readdirSync(config.authDir);
+                      for (const f of files) {
+                        if (f.startsWith(`session-${cleanId}.`)) {
+                          try {
+                            fs.unlinkSync(path.join(config.authDir, f));
+                            logger.warn(
+                              { sessionFile: f, remoteJid: jid },
+                              'Auto-purged corrupted WhatsApp session file for clean re-keying'
+                            );
+                          } catch {}
+                        }
+                      }
+                    }
+                  }
+                } catch {}
+                return method.apply(this, inputArgs);
+              }
+            }
+          },
+          process.stderr
+        );
 
         this.sock = makeWASocket({
           version,
@@ -98,14 +129,9 @@ export class LiveWhatsAppBridge extends WhatsAppBridgeBase {
           syncFullHistory: false,
           shouldSyncHistoryMessage: () => false,
           markOnlineOnConnect: false,
-          fireInitQueries: false,
-          maxMsgRetryCount: 0,
-          retryRequestDelayMs: 5000,
-          placeholderResendCache: {
-            get: () => true,
-            set: () => {},
-            del: () => {}
-          },
+          fireInitQueries: true,
+          maxMsgRetryCount: 5,
+          retryRequestDelayMs: 500,
           shouldIgnoreJid: (jid) => isJidNewsletter(jid) || isJidStatusBroadcast(jid),
           generateHighQualityLinkPreview: false,
           getMessage: async (key) => {

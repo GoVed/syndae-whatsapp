@@ -1,13 +1,13 @@
 export const TOOL_DEFINITIONS = [
   {
     name: 'find_stickers',
-    description: 'Search the sticker catalog by emotional context, tags, or keywords (e.g. "sad cat", "thumbs up", "shrug", "celebrate"). Returns matching sticker IDs, descriptions, and scores.',
+    description: 'Search the built-in sticker catalog by emotional context, tags, or keywords (e.g. "heart", "love", "sad cat", "thumbs up", "shrug", "celebrate"). Returns matching sticker IDs, descriptions, and scores.',
     inputSchema: {
       type: 'object',
       properties: {
         search: {
           type: 'string',
-          description: 'Search query or emotional context (e.g. "sad cat", "thumbs up", "shrug", "declining invitation")'
+          description: 'Search query or emotional context (e.g. "heart", "love", "sad cat", "thumbs up", "shrug", "declining invitation")'
         },
         query: {
           type: 'string',
@@ -26,7 +26,7 @@ export const TOOL_DEFINITIONS = [
   },
   {
     name: 'send_sticker',
-    description: 'Dispatch a rich WebP sticker or animated sticker/GIF to a WhatsApp contact or group. Accepts either a catalog sticker_id from find_stickers OR an HTTP(S) image/GIF/WebP URL (such as returned by download_sticker_as_webp or web sticker search).',
+    description: 'Dispatch a rich WebP sticker or animated sticker to a WhatsApp contact or group. Use this tool whenever the user wants to send a sticker (e.g. "send a heart sticker", "send a thumbs up sticker", cat stickers, reaction stickers). Accepts either a catalog sticker_id from find_stickers (e.g. "heart_love", "cat_shrug", "thumbs_up_classic") or a search keyword (e.g. "heart"), OR an HTTP(S) image/GIF/WebP URL.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -36,7 +36,7 @@ export const TOOL_DEFINITIONS = [
         },
         sticker_id: {
           type: 'string',
-          description: 'A valid sticker ID from find_stickers (e.g. "cat_shrug", "cat_celebrate", "fire_lit") OR a direct image/WebP/GIF URL (from download_sticker_as_webp or web search). Do NOT invent custom sticker names; pass the image/sticker URL if not using a catalog ID.'
+          description: 'A valid sticker ID from find_stickers (e.g. "heart_love", "cat_shrug", "cat_celebrate", "thumbs_up_classic", "fire_lit") or keyword (e.g. "heart"), OR a direct image/WebP/GIF URL.'
         }
       },
       required: ['to', 'sticker_id']
@@ -88,7 +88,7 @@ export const TOOL_DEFINITIONS = [
   },
   {
     name: 'send_message',
-    description: 'Send a plain text message to a WhatsApp contact or group chat. In group chats, you can tag members using @Name (e.g. "@Alice") or pass explicit mentions to notify them.',
+    description: 'Send a plain text message to a WhatsApp contact or group chat. Use this ONLY for sending conversational text messages. Do NOT use this tool if the user wants to send a sticker, photo, GIF, or reaction (use send_sticker, send_image, send_gif, or send_reaction instead). In group chats, you can tag members using @Name or pass explicit mentions.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -98,7 +98,7 @@ export const TOOL_DEFINITIONS = [
         },
         message: {
           type: 'string',
-          description: 'Text content to send (supports @Name tagging in group chats)'
+          description: 'Plain text conversational message to send (do NOT pass sticker or media commands here)'
         },
         mentions: {
           type: 'array',

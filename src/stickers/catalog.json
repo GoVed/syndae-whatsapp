@@ -1,5 +1,13 @@
 [
   {
+    "id": "heart_love",
+    "name": "Red Glowing Heart",
+    "category": "reaction",
+    "description": "Vibrant glowing red heart expressing love, care, romance, warmth, or deep appreciation.",
+    "emotional_context": "love, affection, sending love, sweet, warmth, appreciation, romantic, heart, caring, thank you so much, like",
+    "tags": ["heart", "love", "red heart", "affection", "care", "sweet", "romance", "warmth", "like", "favorite"]
+  },
+  {
     "id": "cat_sad_crying",
     "name": "Sad Crying Cat",
     "category": "cat",

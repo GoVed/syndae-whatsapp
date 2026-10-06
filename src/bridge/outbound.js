@@ -127,7 +127,8 @@ export async function sendLiveSticker(bridge, to, stickerIdOrBuffer) {
       const found = getSticker(stickerId);
       if (found) {
         stickerName = found.name;
-        stickerBuffer = getStickerBuffer(stickerId);
+        stickerId = found.id;
+        stickerBuffer = getStickerBuffer(found.id);
       } else if (fs.existsSync(stickerId)) {
         stickerBuffer = fs.readFileSync(stickerId);
       }

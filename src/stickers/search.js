@@ -176,8 +176,16 @@ export function findStickers(options, defaultLimit = 5) {
 export function getSticker(id) {
   if (!id) return null;
   const catalog = loadCatalog();
-  const found = catalog.find(s => s.id.toLowerCase() === String(id).toLowerCase().trim());
-  return found || null;
+  const trimmed = String(id).toLowerCase().trim();
+  const found = catalog.find(s => s.id.toLowerCase() === trimmed);
+  if (found) return found;
+
+  // Fuzzy match fallback: if exact ID wasn't matched, find closest match by query/tags
+  const matches = findStickers(trimmed, 1);
+  if (matches.length > 0) {
+    return catalog.find(s => s.id === matches[0].id) || null;
+  }
+  return null;
 }
 
 /**

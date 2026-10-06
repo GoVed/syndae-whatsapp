@@ -2,6 +2,25 @@
  * SVG Templates for Built-In Sticker Generation
  */
 export const stickers = {
+  heart_love: `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+      <defs>
+        <radialGradient id="heartGrad" cx="35%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#FF4B72"/>
+          <stop offset="50%" stop-color="#E11D48"/>
+          <stop offset="100%" stop-color="#9F1239"/>
+        </radialGradient>
+        <filter id="heartGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#E11D48" flood-opacity="0.35"/>
+        </filter>
+      </defs>
+      <g filter="url(#heartGlow)">
+        <path d="M 256 450 C 230 430 70 310 70 190 C 70 110 130 55 205 55 C 230 55 250 70 256 80 C 262 70 282 55 307 55 C 382 55 442 110 442 190 C 442 310 282 430 256 450 Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="24" stroke-linejoin="round"/>
+        <path d="M 256 440 C 232 422 80 306 80 190 C 80 116 136 65 205 65 C 228 65 248 78 256 90 C 264 78 284 65 307 65 C 376 65 432 116 432 190 C 432 306 280 422 256 440 Z" fill="url(#heartGrad)"/>
+        <ellipse cx="160" cy="140" rx="40" ry="22" transform="rotate(-35 160 140)" fill="#FFFFFF" opacity="0.35"/>
+      </g>
+    </svg>
+  `,
   cat_shrug: `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
       <defs>

@@ -102,22 +102,21 @@ export function parseWhatsAppMessageContent(rawMessage, extractQuote = true) {
     result = { text: content.conversation, type: 'text', quoted, mentions };
   } else if (typeof content.extendedTextMessage?.text === 'string' && content.extendedTextMessage.text) {
     result = { text: content.extendedTextMessage.text, type: 'text', quoted, mentions };
-  } else if (typeof content.imageMessage?.caption === 'string' && content.imageMessage.caption) {
-    result = { text: content.imageMessage.caption, type: 'image', quoted, mentions };
   } else if (content.imageMessage) {
-    result = { text: '[Image]', type: 'image', quoted, mentions };
-  } else if (typeof content.videoMessage?.caption === 'string' && content.videoMessage.caption) {
-    result = { text: content.videoMessage.caption, type: 'video', quoted, mentions };
+    const caption = typeof content.imageMessage.caption === 'string' ? content.imageMessage.caption.trim() : '';
+    const text = caption ? `[Image: ${caption}]` : '[Image]';
+    result = { text, caption: caption || undefined, type: 'image', quoted, mentions };
   } else if (content.videoMessage) {
-    result = { text: '[Video]', type: 'video', quoted, mentions };
+    const caption = typeof content.videoMessage.caption === 'string' ? content.videoMessage.caption.trim() : '';
+    const text = caption ? `[Video: ${caption}]` : '[Video]';
+    result = { text, caption: caption || undefined, type: 'video', quoted, mentions };
   } else if (content.audioMessage) {
     result = { text: '[Audio/Voice Note]', type: 'audio', quoted, mentions };
-  } else if (typeof content.documentMessage?.caption === 'string' && content.documentMessage.caption) {
-    result = { text: content.documentMessage.caption, type: 'document', quoted, mentions };
-  } else if (typeof content.documentMessage?.fileName === 'string' && content.documentMessage.fileName) {
-    result = { text: `[Document: ${content.documentMessage.fileName}]`, type: 'document', quoted, mentions };
   } else if (content.documentMessage) {
-    result = { text: '[Document]', type: 'document', quoted, mentions };
+    const caption = typeof content.documentMessage.caption === 'string' ? content.documentMessage.caption.trim() : '';
+    const fileName = content.documentMessage.fileName ? ` ${content.documentMessage.fileName}` : '';
+    const text = caption ? `[Document${fileName}: ${caption}]` : (fileName ? `[Document:${fileName}]` : '[Document]');
+    result = { text, caption: caption || undefined, type: 'document', quoted, mentions };
   } else if (content.stickerMessage) {
     result = { text: '[Sticker]', type: 'sticker', quoted, mentions };
   } else if (content.reactionMessage) {

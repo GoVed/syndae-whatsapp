@@ -175,6 +175,7 @@ export class SyndaeRelay {
         group_name: groupSubject,
         chat_name: eventData.chatName || null,
         message: eventData.message || '',
+        caption: eventData.caption || null,
         timestamp: eventData.timestamp || Math.floor(Date.now() / 1000),
         date: eventData.date || new Date((eventData.timestamp || Math.floor(Date.now() / 1000)) * 1000).toISOString(),
         message_id: eventData.messageId,

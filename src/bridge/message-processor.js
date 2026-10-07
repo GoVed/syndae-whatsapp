@@ -36,7 +36,7 @@ export function processRawMessage(bridge, msg, isHistoric = false) {
     ? (bridge.userInfo?.name || 'You')
     : (msg.pushName || contact?.name || cleanParticipant);
 
-  const { text: rawContentText, type, quoted, mentions: rawMentions, reaction } = parseWhatsAppMessageContent(msg.message);
+  const { text: rawContentText, caption, type, quoted, mentions: rawMentions, reaction } = parseWhatsAppMessageContent(msg.message);
 
   if (type === 'empty' || type === 'other') return null;
   if (!rawContentText && type !== 'reaction') return null;
@@ -70,6 +70,7 @@ export function processRawMessage(bridge, msg, isHistoric = false) {
     chatName,
     message: text,
     text,
+    caption: caption || undefined,
     rawText: resolved.rawText,
     mentions: resolved.mentions,
     isSelfTagged: resolved.isSelfTagged,

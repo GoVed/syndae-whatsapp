@@ -29,3 +29,12 @@ services:
       timeout: 5s
       retries: 3
       start_period: 5s
+    networks:
+      - default
+      - syndae_default
+
+networks:
+  default:
+  syndae_default:
+    external: true
+

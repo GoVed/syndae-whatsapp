@@ -100,8 +100,18 @@ export async function sendLiveSticker(bridge, to, stickerIdOrBuffer) {
         fetchUrl = fetchUrl
           .replace('http://localhost:', 'http://host.docker.internal:')
           .replace('http://127.0.0.1:', 'http://host.docker.internal:');
-        const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(10000) });
-        if (res.ok) {
+        let res;
+        try {
+          res = await fetch(fetchUrl, { signal: AbortSignal.timeout(10000) });
+        } catch (err) {
+          if (fetchUrl.includes('syndae-') || !fetchUrl.includes('host.docker.internal')) {
+            const fallbackUrl = fetchUrl.replace(/http:\/\/([a-zA-Z0-9_-]+):(\d+)/, 'http://host.docker.internal:$2');
+            if (fallbackUrl !== fetchUrl) {
+              res = await fetch(fallbackUrl, { signal: AbortSignal.timeout(10000) });
+            }
+          }
+        }
+        if (res && res.ok) {
           const ab = await res.arrayBuffer();
           const buf = Buffer.from(ab);
           // If already a valid WebP container

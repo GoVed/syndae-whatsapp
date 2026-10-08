@@ -130,9 +130,24 @@ export async function resolveMediaSource(source) {
       .replace('http://127.0.0.1:', 'http://host.docker.internal:');
 
     logger.debug({ original: trimmed, fetchUrl }, 'Fetching media from URL');
-    const res = await fetch(fetchUrl, { signal: AbortSignal.timeout(20000) });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch media from URL (${res.status} ${res.statusText}): ${trimmed}`);
+    let res;
+    try {
+      res = await fetch(fetchUrl, { signal: AbortSignal.timeout(20000) });
+    } catch (err) {
+      if (fetchUrl.includes('syndae-') || !fetchUrl.includes('host.docker.internal')) {
+        const fallbackUrl = fetchUrl.replace(/http:\/\/([a-zA-Z0-9_-]+):(\d+)/, 'http://host.docker.internal:$2');
+        if (fallbackUrl !== fetchUrl) {
+          logger.info({ fetchUrl, fallbackUrl }, 'Retrying media fetch via host.docker.internal fallback');
+          res = await fetch(fallbackUrl, { signal: AbortSignal.timeout(20000) });
+        } else {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
+    if (!res || !res.ok) {
+      throw new Error(`Failed to fetch media from URL (${res?.status} ${res?.statusText}): ${trimmed}`);
     }
 
     const contentType = res.headers.get('content-type') || '';

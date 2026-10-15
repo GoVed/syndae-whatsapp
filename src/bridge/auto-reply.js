@@ -15,7 +15,7 @@ export const DEFAULT_CONFIG = {
   scope: 'all', // 'all' | 'groups_only' | 'direct_only'
   includeQuote: true,
   llmEndpoint: process.env.LLM_API_URL || 'http://host.docker.internal:8080/v1/chat/completions',
-  llmModel: process.env.LLM_MODEL || '/models/Qwen3.5-9B-abliterated-Q4_K_M.gguf'
+  llmModel: process.env.LLM_MODEL || '/models/Huihui-Qwen3.8-27B-abliterated-UD-IQ3_S.gguf'
 };
 
 let cachedConfig = null;

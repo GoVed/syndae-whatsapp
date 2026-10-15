@@ -734,7 +734,7 @@ export function renderQrPage(status, initialQrUrl = '', latestQr = '', initialCo
             </div>
             <div class="form-group">
               <label class="form-label">LLM Model Name</label>
-              <input type="text" id="cfgLlmModel" class="input-text" placeholder="/models/Qwen3.5-9B-abliterated-Q4_K_M.gguf">
+              <input type="text" id="cfgLlmModel" class="input-text" placeholder="/models/Huihui-Qwen3.8-27B-abliterated-UD-IQ3_S.gguf">
             </div>
           </div>
         </div>
@@ -1014,7 +1014,7 @@ export function renderQrPage(status, initialQrUrl = '', latestQr = '', initialCo
           scope: 'all',
           includeQuote: true,
           llmEndpoint: 'http://host.docker.internal:8080/v1/chat/completions',
-          llmModel: '/models/Qwen3.5-9B-abliterated-Q4_K_M.gguf'
+          llmModel: '/models/Huihui-Qwen3.8-27B-abliterated-UD-IQ3_S.gguf'
         });
       }
     });
